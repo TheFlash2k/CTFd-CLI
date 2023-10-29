@@ -1,0 +1,1 @@
+from .ctfd import CTFd
