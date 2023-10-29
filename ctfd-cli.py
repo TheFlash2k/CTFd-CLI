@@ -38,7 +38,6 @@ user_get_parser = user_subparsers.add_parser('get', help='Get user')
 user_get_parser.add_argument('--user-id', type=int, help='User ID', required=True)
 user_list_parser = user_subparsers.add_parser('list', help='List users')
 
-
 team_parser = subparsers.add_parser('team', help='Team mode')
 
 args = parser.parse_args()

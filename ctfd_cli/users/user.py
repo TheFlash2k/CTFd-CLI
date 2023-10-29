@@ -24,11 +24,6 @@ class UserHandler:
 
     def get_all_users(self, mode=UserObject) -> List:
 
-        '''
-        NOTE: This function will NOT return users that have 'HIDDEN' attribute set.
-            https://docs.ctfd.io/docs/api/redoc#tag/users/operation/get_user_list
-        '''
-
         if mode != UserObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
             return []
@@ -36,7 +31,7 @@ class UserHandler:
         logger.info("Getting the list of all users...")
         r = RequestHandler.MakeRequest(
             mode=Mode.GET,
-            url=f"{self.ctfd.ctfd_instance}/api/v1/users",
+            url=f"{self.ctfd.ctfd_instance}/api/v1/users?view=admin",
             token=self.ctfd.ctfd_token
         )
 
@@ -52,8 +47,7 @@ class UserHandler:
             return users
         
         return [user.__dict__ for user in users]
-    
-    
+      
     def get_user_by_id(self, id: int, mode=UserObject) -> UserObject|None:
 
         if mode != UserObject and mode != dict:
@@ -85,14 +79,10 @@ class UserHandler:
 
     def get_user_by_name(self, name : str, mode = UserObject) -> UserObject|None:
 
-        '''
-        NOTE: This function will NOT return the user if they have 'HIDDEN' attribute set.
-        '''
-
         logger.info(f"Getting info of user {name}")
         r = RequestHandler.MakeRequest(
             mode=Mode.GET,
-            url=f"{self.ctfd.ctfd_instance}/api/v1/users",
+            url=f"{self.ctfd.ctfd_instance}/api/v1/users?view=admin",
             token=self.ctfd.ctfd_token
         )
 
