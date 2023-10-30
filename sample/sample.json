@@ -1,0 +1,37 @@
+[
+    {
+      "AirOverflow": {
+        "password": null,
+        "members": [
+          {
+            "TheFlash2k": {
+              "type": "admin",
+              "password": "admin123"
+            }
+          },
+          {
+            "hash3lizer": {
+              "hidden": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "AirOverflow2": {
+        "password": null,
+        "members": [
+          "theflash2k-test"
+        ],
+        "hidden": true
+      }
+    },
+    {
+      "AirOverflow3": {
+        "members": [
+          "TheFlash2k",
+          "hash3lizer"
+        ]
+      }
+    }
+]

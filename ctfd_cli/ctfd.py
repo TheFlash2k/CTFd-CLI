@@ -1,16 +1,6 @@
 from .utils.logger import logger
 from .utils.handler import RequestHandler, Mode
-import os
-from dotenv import load_dotenv
-
-def get_env(key: str, curr: str = None, default: str = None, err_msg: str = None) -> str:
-    load_dotenv()
-    if curr != None:
-        return curr
-    value = os.getenv(key, default)
-    if value is None:
-        raise Exception(err_msg)
-    return value
+from .utils.utils import get_env
 
 class CTFd:
     def __init__(self, instance: str, token: str):

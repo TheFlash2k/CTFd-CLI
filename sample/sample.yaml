@@ -1,0 +1,18 @@
+---
+- AirOverflow:
+    password:
+    members:
+    - TheFlash2k:
+        type: admin
+        password: admin123
+    - hash3lizer:
+        hidden: true
+- AirOverflow2:
+    password:
+    members:
+    - theflash2k-test
+    hidden: true
+- AirOverflow3:
+    members:
+    - TheFlash2k
+    - hash3lizer

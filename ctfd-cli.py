@@ -8,6 +8,7 @@ from ctfd_cli import CTFd
 from ctfd_cli.utils.logger import logger
 from ctfd_cli.users.user import UserHandler
 from ctfd_cli.teams.team import TeamHandler
+from ctfd_cli.utils.parser import Parser
 
 
 parser = argparse.ArgumentParser(description='CTFd CLI')
@@ -78,6 +79,16 @@ team_get_parser.add_argument('--team-id', type=int, help='Team ID', required=Tru
 team_list_parser = team_subparsers.add_parser('list', help='List teams')
 
 bulker_parser = subparsers.add_parser('bulk-add', help="Add team and users in bulk (using csv, json and yaml files)")
+bulker_parser.add_argument('--csv-file', type=str, help="CSV File to add teams from (Check samples/sample.csv)")
+bulker_parser.add_argument('--json-file', type=str, help="JSON File to add teams from (Check samples/sample.json)")
+bulker_parser.add_argument('--yaml-file', type=str, help="YAML File to add teams from (Check samples/sample.yaml)")
+bulker_parser.add_argument('--output-format', type=str, help="Output format, can be json, yaml or csv", default="json", choices=["json", "yaml", "csv"])
+bulker_parser.add_argument('--output-file', type=str, help="Output file, if not specified, will be printed to stdout")
+
+parser_parser = subparsers.add_parser('parse', help='Parse a CSV file into a format that CTFD-CLI will understand (currently works only with Google Forms csv sheets)')
+parser_parser.add_argument('--csv-file', type=str, help="CSV File to parse (Check samples/sample.csv)")
+parser_parser.add_argument('--output-format', type=str, help="Output format, can be json, yaml or csv", default="csv", choices=["json", "yaml", "csv"])
+parser_parser.add_argument('--output-file', type=str, help="Output file, if not specified, will be printed to stdout", default="output.csv")
 
 args = parser.parse_args()
 
@@ -267,3 +278,17 @@ elif args.mode == "team":
     else:
         logger.error(f"Invalid team mode {args.team_mode}")
         exit(1)
+
+elif args.mode == "bulk-add":
+    logger.info("Currently under development.")
+    pass
+
+elif args.mode == "parse":
+
+    if args.csv_file == None:
+        logger.error(f"Please specify a csv file to parse")
+        exit(1)
+
+    p = Parser(file=args.csv_file, out_file=args.output_file, out_mode=args.output_format)
+    _teams = p.parse(store=True)
+    pprint(_teams)
