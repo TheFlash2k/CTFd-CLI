@@ -9,11 +9,13 @@ class Parser:
     def __file__(self):
         _i = False
         try:
-            if self.in_file == None:
+            if not self.in_file:
                 raise Exception("No file provided.")
             with open(self.in_file, "r") as f:
                 if f.read() != "":
                     _i = True
+            if not self.out_file:
+                return True
             with open(self.out_file, "w") as f:
                 return (True and _i)
         except Exception as E:

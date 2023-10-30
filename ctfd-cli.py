@@ -88,7 +88,7 @@ bulker_parser.add_argument('--output-file', type=str, help="Output file, if not 
 parser_parser = subparsers.add_parser('parse', help='Parse a CSV file into a format that CTFD-CLI will understand (currently works only with Google Forms csv sheets)')
 parser_parser.add_argument('--csv-file', type=str, help="CSV File to parse (Check samples/sample.csv)")
 parser_parser.add_argument('--output-format', type=str, help="Output format, can be json, yaml or csv", default="csv", choices=["json", "yaml", "csv"])
-parser_parser.add_argument('--output-file', type=str, help="Output file, if not specified, will be printed to stdout", default="output.csv")
+parser_parser.add_argument('--output-file', type=str, help="Output file, if not specified, will be printed to stdout", default="")
 
 args = parser.parse_args()
 
@@ -289,6 +289,13 @@ elif args.mode == "parse":
         logger.error(f"Please specify a csv file to parse")
         exit(1)
 
-    p = Parser(file=args.csv_file, out_file=args.output_file, out_mode=args.output_format)
-    _teams = p.parse(store=True)
-    pprint(_teams)
+    try:
+        _out = args.output_file
+        store = (_out != "")
+    except:
+        _out = ""
+    p = Parser(file=args.csv_file, out_file=_out, out_mode=args.output_format)
+    _teams = p.google_forms(store=store)
+    if not store:
+        logger.info("Teams are: ")
+        pprint(_teams)
