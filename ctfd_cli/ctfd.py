@@ -1,12 +1,20 @@
 from .utils.logger import logger
 from .utils.handler import RequestHandler, Mode
-from .config import *
+import os
+from dotenv import load_dotenv
+
+def get_env(key: str, curr: str = None, default: str = None, err_msg: str = None) -> str:
+    load_dotenv()
+    if curr != None:
+        return curr
+    value = os.getenv(key, default)
+    if value is None:
+        raise Exception(err_msg)
+    return value
 
 class CTFd:
     def __init__(self, instance: str, token: str):
         
-        global ctfd_instance, ctfd_token
-
         self.ctfd_instance = get_env(key="CTFD_INSTANCE", curr=instance, err_msg="CTFD_INSTANCE URL is not set")
         self.ctfd_token    = get_env(key="CTFD_ADMIN_TOKEN", curr=token, err_msg="CTFD_ADMIN_TOKEN is not set")
 
@@ -23,9 +31,6 @@ class CTFd:
             exit(1)
         else:
             logger.info("CTFd instance is working.")
-
-        ctfd_instance = self.ctfd_instance
-        ctfd_token    = self.ctfd_token
 
     def is_working(self):
         r = RequestHandler.MakeRequest(

@@ -1,4 +1,3 @@
-from ..config import *
 from ..utils.logger import logger
 from ..schemas import UserObject
 from ..utils.handler import RequestHandler, Mode
@@ -167,7 +166,7 @@ class UserHandler:
                 "hidden": hidden
             }
         
-        if email != "":
+        if email:
             data["email"] = email
 
         logger.info(f"Creating user {name}...")
@@ -178,7 +177,6 @@ class UserHandler:
             json=data
         )
         if r.status_code == 400:
-            logger.debug(f"Returned {r.json()}")
             logger.error(f"User with name {name} already exists.")
             return None
         

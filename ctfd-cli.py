@@ -7,6 +7,7 @@ import json
 from ctfd_cli import CTFd
 from ctfd_cli.utils.logger import logger
 from ctfd_cli.users.user import UserHandler
+from ctfd_cli.teams.team import TeamHandler
 
 
 parser = argparse.ArgumentParser(description='CTFd CLI')
@@ -26,10 +27,8 @@ user_create_parser.add_argument('--role', type=str, help='Role', default="user")
 user_create_parser.add_argument('--verified', type=bool, help='Verified', default=False)
 user_create_parser.add_argument('--banned', type=bool, help='Banned', default=False)
 user_create_parser.add_argument('--hidden', type=bool, help='Hidden', default=False)
-
 user_delete_parser = user_subparsers.add_parser('delete', help='Delete user')
 user_delete_parser.add_argument('--user-id', type=int, help='User ID', required=True)
-
 user_update_parser = user_subparsers.add_parser('update', help='Update user')
 user_update_parser.add_argument('--user-id', type=int, help='User ID', required=True)
 user_update_parser.add_argument('--attributes', type=str, help='Attributes (passed as a json object)')
@@ -37,15 +36,55 @@ user_update_parser.add_argument('--attributes-json', type=str, help='Attributes 
 user_get_parser = user_subparsers.add_parser('get', help='Get user')
 user_get_parser.add_argument('--user-id', type=int, help='User ID', required=True)
 user_list_parser = user_subparsers.add_parser('list', help='List users')
+user_ban_parser = user_subparsers.add_parser('ban', help='Ban user')
+user_ban_parser.add_argument('--user-id', type=int, help='User ID', required=True)
+user_unban_parser = user_subparsers.add_parser('unban', help='Unban user')
+user_unban_parser.add_argument('--user-id', type=int, help='User ID', required=True)
+user_hide_parser = user_subparsers.add_parser('hide', help='Hide user')
+user_hide_parser.add_argument('--user-id', type=int, help='User ID', required=True)
+user_unhide_parser = user_subparsers.add_parser('unhide', help='Unhide user')
+user_unhide_parser.add_argument('--user-id', type=int, help='User ID', required=True)
 
 team_parser = subparsers.add_parser('team', help='Team mode')
+team_subparsers = team_parser.add_subparsers(required=True, dest='team_mode')
+
+team_create_parser = team_subparsers.add_parser('create', help='Create team')
+team_create_parser.add_argument('--name', type=str, help='Team name', required=True)
+team_create_parser.add_argument('--password', type=str, help='Team password', required=True)
+team_create_parser.add_argument('--email', type=str, help='Team email', default="")
+team_create_parser.add_argument('--affiliation', type=str, help='Team affiliation', default="")
+team_create_parser.add_argument('--country', type=str, help='Team country', default="")
+
+team_add_member_parser = team_subparsers.add_parser('add-member', help='Add member to team')
+team_add_member_parser.add_argument('--team-id', type=int, help='Team ID', required=True)
+team_add_member_parser.add_argument('--user-id', type=int, help='User ID')
+team_add_member_parser.add_argument('--user-ids', type=str, help='List of User IDs (comma separated)')
+
+team_del_member_parser = team_subparsers.add_parser('del-member', help='Remove member from team')
+team_del_member_parser.add_argument('--team-id', type=int, help='Team ID', required=True)
+team_del_member_parser.add_argument('--user-id', type=int, help='User ID')
+team_del_member_parser.add_argument('--user-ids', type=str, help='List of User IDs (comma separated)')
+
+team_delete_parser = team_subparsers.add_parser('delete', help='Delete team')
+team_delete_parser.add_argument('--team-id', type=int, help='Team ID', required=True)
+
+team_update_parser = team_subparsers.add_parser('update', help='Update team')
+team_update_parser.add_argument('--team-id', type=int, help='Team ID', required=True)
+team_update_parser.add_argument('--attributes', type=str, help='Attributes (passed as a json object)')
+team_update_parser.add_argument('--attributes-json', type=str, help='Attributes json file')
+
+team_get_parser = team_subparsers.add_parser('get', help='Get team')
+team_get_parser.add_argument('--team-id', type=int, help='Team ID', required=True)
+team_list_parser = team_subparsers.add_parser('list', help='List teams')
+
+bulker_parser = subparsers.add_parser('bulk-add', help="Add team and users in bulk (using csv, json and yaml files)")
 
 args = parser.parse_args()
 
 ctfd = CTFd(args.ctfd_instance, args.ctfd_token)
-uh = UserHandler(ctfd)
 
 if args.mode == "user":
+    uh = UserHandler(ctfd)
     if args.user_mode == "create":
         user = uh.create_user(
             name=args.name,
@@ -107,9 +146,124 @@ if args.mode == "user":
             logger.error(f"Failed to get users")
             exit(1)
         pprint(users)
+    elif args.user_mode == "ban":
+        if uh.ban_user(id=args.user_id):
+            logger.info(f"Banned user {args.user_id}")
+        else:
+            logger.error(f"Failed to ban user {args.user_id}")
+            exit(1)
+    elif args.user_mode == "unban":
+        if uh.unban_user(id=args.user_id):
+            logger.info(f"Unbanned user {args.user_id}")
+        else:
+            logger.error(f"Failed to unban user {args.user_id}")
+            exit(1)
+    elif args.user_mode == "hide":
+        if uh.hide_user(id=args.user_id):
+            logger.info(f"Hid user {args.user_id}")
+        else:
+            logger.error(f"Failed to hide user {args.user_id}")
+            exit(1)
+    elif args.user_mode == "unhide":
+        if uh.unhide_user(id=args.user_id):
+            logger.info(f"Unhid user {args.user_id}")
+        else:
+            logger.error(f"Failed to unhide user {args.user_id}")
+            exit(1)
     else:
         logger.error(f"Invalid user mode {args.user_mode}")
         exit(1)
 
 elif args.mode == "team":
-    pass
+    th = TeamHandler(ctfd)
+    if args.team_mode == "create":
+        team = th.create_team(
+            name=args.name,
+            password=args.password,
+            email=args.email,
+            affiliation=args.affiliation,
+            country=args.country,
+        )
+        if team == None:
+            logger.error(f"Failed to create team {args.name}")
+            exit(1)
+        logger.info(f"Created team {team}")
+    elif args.team_mode == "delete":
+        if th.delete_team(id=args.team_id):
+            logger.info(f"Deleted team {args.team_id}")
+        else:
+            logger.error(f"Failed to delete team {args.team_id}")
+            exit(1)
+    elif args.team_mode == "update":
+
+        if args.attributes == None and args.attributes_json == None:
+            logger.error(f"No attributes were set to update.")
+            exit(1)
+
+        if args.attributes_json != None:
+            try:
+                with open(args.attributes_json, "r") as f:
+                    args.attributes = f.read()
+            except FileNotFoundError:
+                logger.error(f"File {args.attributes_json} not found")
+                exit(1)
+
+        if args.attributes == None:
+            logger.error(f"No attributes were set to update.")
+            exit(1)
+
+        try:
+            attr = json.loads(args.attributes)
+        except json.decoder.JSONDecodeError:
+            logger.error(f"Invalid attributes {args.attributes}")
+            exit(1)
+        team = th.update_team_attribute(id=args.team_id, attributes=attr, mode=dict)
+        if team == None:
+            logger.error(f"Failed to update team {args.team_id}")
+            exit(1)
+        logger.info(f"Updated team {team}")
+    elif args.team_mode == "get":
+        team = th.get_team_by_id(id=args.team_id, mode=dict)
+        if team == None:
+            logger.error(f"Failed to get team {args.team_id}")
+            exit(1)
+        logger.info(f"Got team {team}")
+    elif args.team_mode == "list":
+        teams = th.get_all_teams(mode=dict)
+        if teams == None:
+            logger.error(f"Failed to get teams")
+            exit(1)
+        pprint(teams)
+    elif args.team_mode == "add-member":
+        if args.user_id != None:
+            user_ids = [args.user_id]
+        elif args.user_ids != None:
+            user_ids = args.user_ids.split(",")
+        else:
+            logger.error(f"Please specify either --user-id or --user-ids")
+            exit(1)
+
+        for user_id in user_ids:
+            if th.add_member(id=args.team_id, user_id=user_id):
+                logger.info(f"Added user {user_id} to team {args.team_id}")
+            else:
+                logger.error(f"Failed to add user {user_id} to team {args.team_id}")
+                exit(1)
+    elif args.team_mode == "del-member":
+        if args.user_id != None:
+            user_ids = [args.user_id]
+        elif args.user_ids != None:
+            user_ids = args.user_ids.split(",")
+        else:
+            logger.error(f"Please specify either --user-id or --user-ids")
+            exit(1)
+
+        for user_id in user_ids:
+            if th.remove_member(id=args.team_id, user_id=user_id):
+                logger.info(f"Removed user {user_id} from team {args.team_id}")
+            else:
+                logger.error(f"Failed to remove user {user_id} from team {args.team_id}")
+                exit(1)
+    else:
+        logger.error(f"Invalid team mode {args.team_mode}")
+        exit(1)

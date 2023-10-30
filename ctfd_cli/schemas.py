@@ -14,8 +14,8 @@ class UserObject:
             self.__set_val__("email", None)
             self.__set_val__("team_id", None)
 
-            return f"CTFd-User({f'[HIDDEN]{self.hidden} ' if self.hidden else ''}{f'[BANNED]{self.banned} ' if self.banned else ''}id={self.id}, name={self.name}, team_id={self.team_id})"
-        except:
+            return f"CTFd-User({f'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}id={self.id}, name={self.name}, team_id={self.team_id})"
+        except Exception as E:
             return "CTFd-User(?)"
     
     def __repr__(self):
@@ -35,9 +35,12 @@ class TeamObject:
         try:
             self.__set_val__("banned", False)
             self.__set_val__("hidden", False)
-            self.__set_val__("email", None)
-
-            return f"CTFd-Team({f'[HIDDEN]{self.hidden} ' if self.hidden else ''}{f'[BANNED]{self.banned} ' if self.banned else ''}id={self.id}, name={self.name}, members={self.members})"
+            r = f"CTFd-Team(id={self.id}, name={self.name}"
+            if hasattr(self, "members"):
+                r += f", members={self.members}"
+            r += ")"
+            r += f"{'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}"
+            return r
         except:
             return "CTFd-Team(?)"
     
