@@ -78,6 +78,11 @@ team_get_parser = team_subparsers.add_parser('get', help='Get team')
 team_get_parser.add_argument('--team-id', type=int, help='Team ID', required=True)
 team_list_parser = team_subparsers.add_parser('list', help='List teams')
 
+team_ban_parser = team_subparsers.add_parser('ban', help='Ban team')
+team_ban_parser.add_argument('--team-id', type=int, help='Team ID', required=True)
+team_unban_parser = team_subparsers.add_parser('unban', help='Unban team')
+team_unban_parser.add_argument('--team-id', type=int, help='Team ID', required=True)
+
 bulker_parser = subparsers.add_parser('bulk-add', help="Add team and users in bulk (using csv, json and yaml files)")
 bulker_parser.add_argument('--csv-file', type=str, help="CSV File to add teams from (Check samples/sample.csv)")
 bulker_parser.add_argument('--json-file', type=str, help="JSON File to add teams from (Check samples/sample.json)")
@@ -275,6 +280,18 @@ elif args.mode == "team":
             else:
                 logger.error(f"Failed to remove user {user_id} from team {args.team_id}")
                 exit(1)
+    elif args.team_mode == "ban":
+        if th.ban_team(id=args.team_id):
+            logger.info(f"Banned team {args.team_id}")
+        else:
+            logger.error(f"Failed to ban team {args.team_id}")
+            exit(1)
+    elif args.team_mode == "unban":
+        if th.unban_team(id=args.team_id):
+            logger.info(f"Unbanned team {args.team_id}")
+        else:
+            logger.error(f"Failed to unban team {args.team_id}")
+            exit(1)
     else:
         logger.error(f"Invalid team mode {args.team_mode}")
         exit(1)
