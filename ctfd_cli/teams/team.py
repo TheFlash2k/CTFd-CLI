@@ -169,7 +169,7 @@ class TeamHandler:
 
         if r.status_code == 400:
             logger.error(f"Team with name {name} already exists.")
-            return None
+            return self.get_team_by_name(name)
 
         if data == None:
             return None
