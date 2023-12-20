@@ -12,7 +12,7 @@ class UserHandler:
         self.ctfd = ctfd
 
     def __request__(self, req, default_ret_val=None, default_status_code = 200):
-        if req.status_code != default_status_code:
+        if req.status_code != default_status_code and req.status_code != 200: # Just a hard-coded check.
             return default_ret_val
         try:
             data = req.json()['data']
@@ -178,7 +178,7 @@ class UserHandler:
         )
         if r.status_code == 400:
             logger.error(f"User with name {name} already exists.")
-            return None
+            return self.get_user_by_name(name)
         
         data = self.__request__(r, None, 201)
         if data == None:
