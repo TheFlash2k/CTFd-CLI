@@ -12,6 +12,10 @@ class UserObject:
         for key, value in kwargs.items():
             setattr(self, key, value.strip() if isinstance(value, str) else value)
 
+        for elem in ["name", "affiliation"]:
+            if hasattr(self, elem):
+                setattr(self, elem, getattr(self, elem).strip().title())
+
         self.__set_val__("password", random_string())
 
     def __str__(self):
@@ -44,6 +48,10 @@ class TeamObject:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+        for elem in ["name", "affiliation"]:
+            if hasattr(self, elem):
+                setattr(self, elem, getattr(self, elem).strip().title())
 
         self.__set_val__("password", random_string())
 

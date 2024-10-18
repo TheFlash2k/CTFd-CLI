@@ -79,7 +79,7 @@ class BulkAdd(object):
             if "," in team.email:
                 team.email = team.email.split(",")[0]
 
-            info["name"] = team.name
+            info["name"] = team.name.strip().title()
             info["email"] = team.email
             info["members"] = []
 
@@ -117,5 +117,5 @@ class BulkAdd(object):
                     writer.writerow(info)
                 elif self.out_format == "yaml":
                     f.write(yaml.dump(info) + "\n")
-
-            exit(0)
+            logger.info(f"Team {team.name} added successfully.")
+        
