@@ -13,23 +13,22 @@ class BulkAdd(object):
     allowed_formats = ["json", "csv", "yaml"]
 
     def __init__(self, input_file: str, format: str, out_format, output_file: str, force=False, ctfd: CTFd = None):
-        self.input_file = input_file
+
+        self.ctfd = ctfd
+        self.force = force
         self.format = format
+        self.input_file = input_file
+        self.out_format = out_format
+        self.output_file = output_file
 
         if not os.path.isfile(input_file):
             logger.error(f"Input file {input_file} does not exist.")
             exit(1)
 
-        if os.path.isfile(output_file) and not force:
+        if os.path.isfile(output_file) and not self.force:
             logger.error(f"Output file {output_file} already exists. Use --force to overwrite.")
             exit(1)
 
-        self.ctfd = ctfd
-
-        self.format = format
-        self.out_format = out_format
-
-        self.output_file = output_file
 
         if self.out_format not in self.allowed_formats:
             logger.error(f"Invalid output format {out_format}. Must be one of: json, csv, yaml.")
@@ -53,10 +52,38 @@ class BulkAdd(object):
             self.data = yaml.safe_load(open(input_file))
 
     def add(self):
+
         teams = []
+        team_names = []
+        team_emails = []
+        
         for entry in self.data:
             team = TeamObject(**entry)
+
+            if team.name in team_names:
+                logger.error(f"Duplicate team name found: {team.name}")
+                continue
+
+            if team.email in team_emails:
+                logger.error(f"Duplicate team email found: {team.email}")
+                continue
+
+            team_names.append(team.name)
+            team_emails.append(team.email)
             teams.append(team)
+
+        if not self.force:
+            logger.error("Use --force to force add teams and discard duplicates.")
+            
+        """
+        To-DO:
+        
+        Check for duplicate members across teams.
+        If there are any, modify the name as:
+        <name>_<team_name>
+
+        This is to avoid conflicts.
+        """
 
         if not self.ctfd:
             logger.error("CTFd instance is not set.")
@@ -118,4 +145,4 @@ class BulkAdd(object):
                 elif self.out_format == "yaml":
                     f.write(yaml.dump(info) + "\n")
             logger.info(f"Team {team.name} added successfully.")
-        
+            exit(0)
