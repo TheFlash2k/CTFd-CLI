@@ -178,7 +178,7 @@ class UserHandler:
             json=data
         )
         if r.status_code == 400:
-            logger.error(f"User with name {name} already exists.")
+            logger.error(f"User with name {name} might already exists. [Error: {r.json()['errors']}]")
             return self.get_user_by_name(name) if return_if_exists else None
         
         data = self.__request__(r, None, 201)

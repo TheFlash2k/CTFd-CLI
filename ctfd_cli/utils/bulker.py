@@ -56,6 +56,8 @@ class BulkAdd(object):
         teams = []
         team_names = []
         team_emails = []
+        logged = []
+        
 
         for entry in self.data:
             team = TeamObject(**entry)
@@ -71,6 +73,24 @@ class BulkAdd(object):
             team_names.append(team.name)
             team_emails.append(team.email)
             teams.append(team)
+
+        if os.path.isfile(self.output_file):
+            with open(self.output_file, "r") as f:
+                if self.out_format == "json":
+                    for line in f:
+                        data = json.loads(line)
+                        logged.append(data["Name"])
+                elif self.out_format == "csv":
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        logged.append(row["Name"])
+                elif self.out_format == "yaml":
+                    for line in f:
+                        data = yaml.safe_load(line)
+                        logged.append(data["Name"])
+        
+        teams = [team for team in teams if team.name not in logged]
+        logger.info(f"Found {len(teams)} teams to add (already wrote: {len(logged)} teams).")
 
         if not self.force:
             logger.error("Use --force to force add teams and discard duplicates.")
@@ -93,9 +113,10 @@ class BulkAdd(object):
         uh = UserHandler(self.ctfd)
 
         if self.out_format == "csv":
-            with open(self.output_file, "w") as f:
-                writer = csv.DictWriter(f, fieldnames=self.csv_fields)
-                writer.writeheader()
+            if not os.path.isfile(self.output_file):
+                with open(self.output_file, "w") as f:
+                    writer = csv.DictWriter(f, fieldnames=self.csv_fields)
+                    writer.writeheader()
 
         for team in teams:
             info = {}
@@ -104,20 +125,23 @@ class BulkAdd(object):
             There was this one edge case where a person entered
             multiple emails in a single email field separated by a ,:
             """
+            team.email = team.email.strip()
+            team.name = team.name.strip().title()
+
             if "," in team.email:
                 team.email = team.email.split(",")[0]
 
-            info["Name"] = team.name.strip().title()
-            info["Email"] = team.email.strip()
+            info["Name"] = team.name
+            info["Email"] = team.email
             info["members"] = []
 
             logger.debug("Adding team: " + team.name)
-            if not (_team := th.create_team_from_dict(team.__dict__, mode=TeamObject)):
+            if not (_team := th.create_team_from_dict(team.__dict__, return_if_exists = False, mode = TeamObject)):
                 logger.error(f"Failed to create team {team.name}")
-                continue
 
             logger.debug(f"Got team: {_team}")
             for i, member in enumerate(team.members):
+                member.name = member.name.strip().title()
                 logger.debug(f"Adding user: {member.name}")
                 if not (_member := uh.create_user_from_dict(member.__dict__, return_if_exists=False)):
                     logger.error(f"Failed to create user {member.name}")

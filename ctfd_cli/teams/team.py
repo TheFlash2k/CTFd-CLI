@@ -137,7 +137,7 @@ class TeamHandler:
         except:
             return data
     
-    def create_team(self, name: str, password: str, email: str = None, affiliation: str = None, website: str = None, country: str = None, mode=TeamObject, **kwargs) -> TeamObject|None:
+    def create_team(self, name: str, password: str, email: str = None, affiliation: str = None, website: str = None, country: str = None, return_if_exists: bool = True, mode: object = TeamObject, **kwargs) -> TeamObject|None:
         # kwargs kept to maintain compatibility with bulker
         if mode != TeamObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
@@ -167,8 +167,8 @@ class TeamHandler:
         data = self.__request__(r, None, 200)
 
         if r.status_code == 400:
-            logger.error(f"Team with name {name} already exists.")
-            return self.get_team_by_name(name)
+            logger.error(f"Team with name {name} might already exists. [Error: {r.json()['errors']}]")
+            return self.get_team_by_name(name) if return_if_exists else None
 
         if data == None:
             return None
@@ -180,8 +180,9 @@ class TeamHandler:
         
         return team.__dict__
     
-    def create_team_from_dict(self, team_dict: dict, mode=TeamObject) -> TeamObject|None:
-        return self.create_team(**team_dict)
+    def create_team_from_dict(self, team_dict: dict, return_if_exists: bool = True, mode: object = TeamObject) -> TeamObject|None:
+        # get all args as dict and pass it to create_team
+        return self.create_team(**team_dict, return_if_exists=return_if_exists, mode=mode)
     
     def delete_team(self, id: int) -> bool:
         logger.info(f"Deleting team {id}...")
