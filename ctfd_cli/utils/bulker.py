@@ -56,7 +56,7 @@ class BulkAdd(object):
         teams = []
         team_names = []
         team_emails = []
-        
+
         for entry in self.data:
             team = TeamObject(**entry)
 
@@ -74,6 +74,7 @@ class BulkAdd(object):
 
         if not self.force:
             logger.error("Use --force to force add teams and discard duplicates.")
+            exit(0)
             
         """
         To-DO:
