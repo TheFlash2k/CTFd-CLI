@@ -9,6 +9,7 @@ from ctfd_cli.utils.logger import logger
 from ctfd_cli.users.user import UserHandler
 from ctfd_cli.teams.team import TeamHandler
 from ctfd_cli.utils.parser import Parser
+from ctfd_cli.utils.bulker import BulkAdd
 
 
 parser = argparse.ArgumentParser(description='CTFd CLI')
@@ -84,16 +85,18 @@ team_unban_parser = team_subparsers.add_parser('unban', help='Unban team')
 team_unban_parser.add_argument('--team-id', type=int, help='Team ID', required=True)
 
 bulker_parser = subparsers.add_parser('bulk-add', help="Add team and users in bulk (using csv, json and yaml files)")
-bulker_parser.add_argument('--csv-file', type=str, help="CSV File to add teams from (Check samples/sample.csv)")
-bulker_parser.add_argument('--json-file', type=str, help="JSON File to add teams from (Check samples/sample.json)")
-bulker_parser.add_argument('--yaml-file', type=str, help="YAML File to add teams from (Check samples/sample.yaml)")
-bulker_parser.add_argument('--output-format', type=str, help="Output format, can be json, yaml or csv", default="json", choices=["json", "yaml", "csv"])
-bulker_parser.add_argument('--output-file', type=str, help="Output file, if not specified, will be printed to stdout")
+bulker_parser.add_argument('--file', '-f', type=str, help="File to add teams from (Check samples/sample.{csv,json,yaml})")
+bulker_parser.add_argument('--format', type=str, help="Format of the input file (csv, json, yaml)", default="", choices=["csv", "json", "yaml"])
+bulker_parser.add_argument('--output-format', type=str, help="Output format, can be json, yaml or csv", default="csv", choices=["json", "yaml", "csv"])
+bulker_parser.add_argument('--output-file', '-o', type=str, help="Output file, if not specified, will be printed to stdout")
+bulker_parser.add_argument('--force', action="store_true", help="Force overwrite output file if it exists")
 
 parser_parser = subparsers.add_parser('parse', help='Parse a CSV file into a format that CTFD-CLI will understand (currently works only with Google Forms csv sheets)')
 parser_parser.add_argument('--csv-file', type=str, help="CSV File to parse (Check samples/sample.csv)")
 parser_parser.add_argument('--output-format', type=str, help="Output format, can be json, yaml or csv", default="csv", choices=["json", "yaml", "csv"])
 parser_parser.add_argument('--output-file', type=str, help="Output file, if not specified, will be printed to stdout", default="")
+parser_parser.add_argument('--format', type=str, help="The format that the input csv file is in. Please run --help-format for more information", default="")
+parser_parser.add_argument('--help-format', action="store_true", help="Prints the format that the input csv file should be in")
 
 args = parser.parse_args()
 
@@ -297,8 +300,24 @@ elif args.mode == "team":
         exit(1)
 
 elif args.mode == "bulk-add":
-    logger.info("Currently under development.")
-    pass
+    """
+        Check if csv-file, json-file or yaml-file is set
+        If none is set, give error:
+    """
+    if not args.file:
+        logger.error(f"Please specify a csv-file, json-file or yaml-file")
+        exit(1)
+
+    if args.output_format == None:
+        logger.error(f"Please specify an output format")
+        exit(1)
+
+    if args.output_file == None:
+        logger.error(f"Please specify an output file")
+        exit(1)
+
+    bulker = BulkAdd(input_file=args.file, format=args.format, out_format=args.output_format, output_file=args.output_file, force=args.force, ctfd=ctfd)
+    bulker.add()
 
 elif args.mode == "parse":
 
@@ -306,12 +325,16 @@ elif args.mode == "parse":
         logger.error(f"Please specify a csv file to parse")
         exit(1)
 
+    if args.help_format:
+        Parser.__help__()
+        exit(0)
+
     try:
         _out = args.output_file
         store = (_out != "")
     except:
         _out = ""
-    p = Parser(file=args.csv_file, out_file=_out, out_mode=args.output_format)
+    p = Parser(file=args.csv_file, out_file=_out, out_mode=args.output_format, format=args.format)
     _teams = p.google_forms(store=store)
     if not store:
         logger.info("Teams are: ")

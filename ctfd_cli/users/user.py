@@ -150,7 +150,7 @@ class UserHandler:
             return False        
         return True
     
-    def create_user(self, name: str, password: str, email: str = "", team_id: int = None, role: str = "user", verified: bool = False, banned: bool = False, hidden: bool = False, mode=UserObject) -> UserObject|None:
+    def create_user(self, name: str, password: str, email: str = "", team_id: int = None, role: str = "user", verified: bool = False, banned: bool = False, hidden: bool = False, mode=UserObject, **kwargs) -> UserObject|None:
 
         if mode != UserObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
@@ -163,7 +163,8 @@ class UserHandler:
                 "role": role,
                 "verified": verified,
                 "banned": banned,
-                "hidden": hidden
+                "hidden": hidden,
+                "affiliation": kwargs.get("affiliation", None),
             }
         
         if email:

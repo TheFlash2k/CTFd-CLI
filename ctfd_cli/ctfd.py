@@ -3,7 +3,7 @@ from .utils.handler import RequestHandler, Mode
 from .utils.utils import get_env
 
 class CTFd:
-    def __init__(self, instance: str, token: str):
+    def __init__(self, instance: str = "", token: str = ""):
         
         self.ctfd_instance = get_env(key="CTFD_INSTANCE", curr=instance, err_msg="CTFD_INSTANCE URL is not set")
         self.ctfd_token    = get_env(key="CTFD_ADMIN_TOKEN", curr=token, err_msg="CTFD_ADMIN_TOKEN is not set")

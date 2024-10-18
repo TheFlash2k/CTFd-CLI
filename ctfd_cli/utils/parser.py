@@ -21,12 +21,34 @@ class Parser:
         except Exception as E:
             raise E
 
-    def __init__(self, file, out_file = "output.csv", out_mode="csv"):
+    def __init__(self, file, out_file = "output.csv", out_mode="csv", format=""):
         self.in_file = file
         self.out_file = out_file
         self.out_mode = out_mode
         self.__file__() # File checking...
         self.data = {}
+        self.fields = format
+
+    @staticmethod
+    def __help__():
+        print(f"""NOTE: Fields with * are optional. Rest are important.
+              
+Example::
+Let's say you're google forms csv is:
+              
+Timestamp,Team Name,Team Member 1 - Name, Team Member 2 - Name
+10/30/2023 17:50:19, AirOverflow, TheFlash2k, Hash3lizer
+
+The first field i.e. timestamp will automatically be skipped. Your form field will be:
+team_name,user_name
+
+Similarly:
+Timestamp,Team Name,Team Member 1 - Name, Team Member 1 - Email, Team Member 2 - Name, Team Member 2 - Email
+10/30/2023 17:50:19, AirOverflow, TheFlash2k, root@theflash2k.me, Hash3lizer, info@shameerkashif.me
+
+This will be:
+team_name,user_name,user_email
+""")
 
     def google_forms(self, store=True) -> dict:
 
@@ -47,30 +69,15 @@ class Parser:
                 t_fields += "*"
             t_fields += list(i.keys())[0] + ", "
 
-        print(f"""Valid fields: {t_fields}
-NOTE: Fields with * are optional. Rest are important.
-              
-Example::
-Let's say you're google forms csv is:
-              
-Timestamp,Team Name,Team Member 1 - Name, Team Member 2 - Name
-10/30/2023 17:50:19, AirOverflow, TheFlash2k, Hash3lizer
-
-The first field i.e. timestamp will automatically be skipped. Your form field will be:
-team_name,user_name
-
-Similarly:
-Timestamp,Team Name,Team Member 1 - Name, Team Member 1 - Email, Team Member 2 - Name, Team Member 2 - Email
-10/30/2023 17:50:19, AirOverflow, TheFlash2k, root@theflash2k.me, Hash3lizer, info@shameerkashif.me
-
-This will be:
-team_name,user_name,user_email
-""")
-        fields = input("Enter form fields seperated by a comma\n>> ")
-        if not fields:
-            logger.error("No fields entered.")
-            return False
-        fields = fields.replace(' ','').split(",")
+        if not self.fields:
+            print(f"Valid fields: {t_fields}")
+            self.__help__()
+            self.fields = input("Enter form fields seperated by a comma\n>> ")
+            if not self.fields:
+                logger.error("No fields entered.")
+                return False
+            
+        fields = self.fields.replace(' ','').split(",")
 
         if len(fields) < 2:
             logger.error("Atleast 2 fields are required.")
@@ -96,21 +103,28 @@ team_name,user_name,user_email
             self.data = [i[1:] for i in self.data[1:]]
 
         teamname_idx = fields.index("team_name")
-        teams = {}
+        teams = [{} for i in range(len(self.data))]
         
+        iter = 0
         for i in self.data:
-            teams[i[teamname_idx]] = {}
+            # Prevent empty team names.
+            if not i[teamname_idx]:
+                continue
+
+            teams[iter] = {
+                "name": i[teamname_idx]
+            }
 
             for j in fields:
                 if j.startswith("team_") and j != "team_name":
-                    teams[i[teamname_idx]][j.replace("team_", '')] = i[fields.index(j)]
+                    teams[iter][j.replace("team_", '')] = i[fields.index(j)]
             
             user_fields = {}
             for j in fields:
                 if j.startswith("user_"):
                     user_fields[j] = fields.index(j)
 
-            teams[i[teamname_idx]]["members"] = []
+            teams[iter]["members"] = []
 
             idxs = []
             for j in user_fields:
@@ -125,16 +139,19 @@ team_name,user_name,user_email
                 for k in fields:
                     if k.startswith("user_"):
                         try:
-                            user_fields[k.replace("user_",'')] = user[fields.index(k) - start]
+                            user_fields[
+                                k.replace("user_",'')] = user[
+                                    fields.index(k) - start]
                         except IndexError:
                             pass
 
-                name = user_fields["name"]
-                del user_fields["name"]
-                if user_fields == {}:
-                    teams[i[teamname_idx]]["members"].append(name)
-                else:
-                    teams[i[teamname_idx]]["members"].append({name: user_fields})
+                if user_fields["name"]:
+                    teams[iter]["members"].append(
+                        {k: user_fields[k].strip() for k in user_fields})
+            iter += 1
+
+        teams = [i for i in teams if i != {}] # remove empty objects.
+        
         if store:
             if self.out_mode == "json":
                 with open(self.out_file, "w") as f:
@@ -171,8 +188,9 @@ team_name,user_name,user_email
                 logger.error(f"Invalid output mode {self.out_mode}")
                 return False
             
-            print(f"Output saved to {self.out_file}")
+            logger.info(f"Output saved to {self.out_file}")
         return teams
     
     def parse(self, store=True) -> dict:
-        return self.google_forms(store=store)
+        return self.google_forms(
+            store=store)

@@ -121,6 +121,18 @@ usage: ctfd-cli.py user list
 
 ### Team mode
 
-> Currently under development.
+> I haven't written the documentation for this but it is complete.
 
 ---
+
+### Bulk Add
+
+For bulk add, you need to run `parse` first, and then just validate. Then running bulk add will automatically add the users and teams to CTFd.
+
+> By design, I've allowed only 3 users per team. You can modify it in `bulker.py:12`
+
+---
+
+## NOTE:
+
+If someone can help me in writing a full documentation, please make a pull request, I'll review and merge, really busy these days to write a full documentation.

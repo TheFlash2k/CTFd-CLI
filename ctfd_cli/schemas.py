@@ -1,3 +1,8 @@
+def random_string(length: int = 10) -> str:
+    import random
+    import string
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
 class UserObject:
     def __set_val__(self, value, default=None):
         if not hasattr(self, value):
@@ -5,7 +10,9 @@ class UserObject:
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            setattr(self, key, value.strip() if isinstance(value, str) else value)
+
+        self.__set_val__("password", random_string())
 
     def __str__(self):
         try:
@@ -14,14 +21,21 @@ class UserObject:
             self.__set_val__("email", None)
             self.__set_val__("team_id", None)
 
-            return f"CTFd-User({f'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}id={self.id}, name={self.name}, team_id={self.team_id})"
+            _id = getattr(self, "id", None)
+            team_id = getattr(self, "team_id", None)
+
+            extras = ", ".join([
+                f"{key}={value}" for key, value in self.__dict__.items()
+                if key not in ["id", "name", "team_id", "banned", "hidden"] and value is not None
+            ])
+                
+            return f"CTFd-User({f'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}{f'id={_id}, ' if _id else ""}name={self.name}{f', team_id={team_id}, ' if team_id else ", "}{extras})"
         except Exception as E:
-            return "CTFd-User(?)"
+            return f"CTFd-User(?, Error: {E})"
     
     def __repr__(self):
         return self.__str__()
 
-    
 class TeamObject:
     def __set_val__(self, value, default=None):
         if not hasattr(self, value):
@@ -31,18 +45,26 @@ class TeamObject:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+        self.__set_val__("password", random_string())
+
+        if hasattr(self, "members"):
+            self.members = [UserObject(**member) for member in self.members]
+
     def __str__(self):
         try:
             self.__set_val__("banned", False)
             self.__set_val__("hidden", False)
-            r = f"CTFd-Team(id={self.id}, name={self.name}"
-            if hasattr(self, "members"):
-                r += f", members={self.members}"
-            r += ")"
-            r += f"{'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}"
-            return r
-        except:
-            return "CTFd-Team(?)"
+            _id = getattr(self, "id", None)
+
+            extras = ", ".join([
+                f"{key}={value}" for key, value in self.__dict__.items()
+                if key not in ["id", "name", "members", "banned", "hidden"] and value is not None
+            ])
+
+            return f"CTFd-Team({f'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}{f'id={_id}, ' if _id else ""}name={self.name}, {f'members={self.members}, ' if hasattr(self, "members") else ""}{extras})"
+        
+        except Exception as E:
+            return f"CTFd-Team(?, Error: {E})"
     
     def __repr__(self):
         return self.__str__()

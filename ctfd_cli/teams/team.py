@@ -137,8 +137,8 @@ class TeamHandler:
         except:
             return data
     
-    def create_team(self, name: str, password: str, email: str = None, affiliation: str = None, website: str = None, country: str = None, mode=TeamObject) -> TeamObject|None:
-
+    def create_team(self, name: str, password: str, email: str = None, affiliation: str = None, website: str = None, country: str = None, mode=TeamObject, **kwargs) -> TeamObject|None:
+        # kwargs kept to maintain compatibility with bulker
         if mode != TeamObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
             return None
@@ -146,7 +146,7 @@ class TeamHandler:
         if name == None:
             return None
         
-        data= {
+        data = {
             "name": name,
             "password": password,
             "affiliation": affiliation,
@@ -154,8 +154,7 @@ class TeamHandler:
             "country": country
         }
 
-        if email:
-            data['email'] = email
+        if email: data['email'] = email
 
         logger.info(f"Creating team {name}...")
         r = RequestHandler.MakeRequest(

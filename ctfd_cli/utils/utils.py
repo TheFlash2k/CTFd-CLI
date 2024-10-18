@@ -4,6 +4,8 @@ import random
 import string
 
 def random_string(length: int = 10) -> str:
+    import random
+    import string
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 def get_env(key: str, curr: str = None, default: str = None, err_msg: str = None) -> str:

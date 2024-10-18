@@ -1,37 +1,28 @@
 [
     {
-      "AirOverflow": {
-        "password": null,
-        "members": [
+      "name": "AirOverflow",
+      "password": null,
+      "members": [
           {
-            "TheFlash2k": {
-              "type": "admin",
-              "password": "admin123"
-            }
-          },
-          {
-            "hash3lizer": {
-              "hidden": true
-            }
+            "name": "TheFlash2k",
+            "type": "admin",
+            "password": "admin123"
           }
         ]
-      }
     },
     {
-      "AirOverflow2": {
-        "password": null,
-        "members": [
+      "name": "AirOverflow2",
+      "password": null,
+      "members": [
           "theflash2k-test"
-        ],
-        "hidden": true
-      }
+      ],
+      "hidden": true
     },
     {
-      "AirOverflow3": {
-        "members": [
-          "TheFlash2k",
-          "hash3lizer"
-        ]
-      }
+      "name": "AirOverflow3",
+      "members": [
+        "TheFlash2k",
+        "hash3lizer"
+      ]
     }
 ]
