@@ -107,23 +107,23 @@ class BulkAdd(object):
             if "," in team.email:
                 team.email = team.email.split(",")[0]
 
-            info["name"] = team.name.strip().title()
-            info["email"] = team.email
+            info["Name"] = team.name.strip().title()
+            info["Email"] = team.email
             info["members"] = []
 
-            logger.info("Adding team: " + team.name)
+            logger.debug("Adding team: " + team.name)
             if not (_team := th.create_team_from_dict(team.__dict__, mode=TeamObject)):
                 logger.error(f"Failed to create team {team.name}")
                 continue
 
-            logger.info(f"Got team: {_team}")
+            logger.debug(f"Got team: {_team}")
             for i, member in enumerate(team.members):
-                logger.info(f"Adding user: {member.name}")
+                logger.debug(f"Adding user: {member.name}")
                 if not (member := uh.create_user_from_dict(member.__dict__, mode=UserObject)):
                     logger.error(f"Failed to create user {member.name}")
                     continue
                 
-                logger.info(f"Adding {member.name} to {_team.name}")
+                logger.debug(f"Adding {member.name} to {_team.name}")
                 th.add_member(_team.id, member.id)
 
                 info[f"members"].append({
@@ -146,4 +146,3 @@ class BulkAdd(object):
                 elif self.out_format == "yaml":
                     f.write(yaml.dump(info) + "\n")
             logger.info(f"Team {team.name} added successfully.")
-            exit(0)
