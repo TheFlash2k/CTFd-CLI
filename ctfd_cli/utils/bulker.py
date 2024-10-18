@@ -108,7 +108,7 @@ class BulkAdd(object):
                 team.email = team.email.split(",")[0]
 
             info["Name"] = team.name.strip().title()
-            info["Email"] = team.email
+            info["Email"] = team.email.strip()
             info["members"] = []
 
             logger.debug("Adding team: " + team.name)
@@ -119,12 +119,16 @@ class BulkAdd(object):
             logger.debug(f"Got team: {_team}")
             for i, member in enumerate(team.members):
                 logger.debug(f"Adding user: {member.name}")
-                if not (member := uh.create_user_from_dict(member.__dict__, mode=UserObject)):
+                if not (_member := uh.create_user_from_dict(member.__dict__, return_if_exists=False)):
                     logger.error(f"Failed to create user {member.name}")
-                    continue
+                    member.name = f"{member.name}_{team.name.replace(' ', '-')}"
+
+                    if not (_member := uh.create_user_from_dict(member.__dict__, return_if_exists=False)):
+                        logger.error(f"Failed to create user {member.name}")
+                        continue
                 
                 logger.debug(f"Adding {member.name} to {_team.name}")
-                th.add_member(_team.id, member.id)
+                th.add_member(_team.id, _member.id)
 
                 info[f"members"].append({
                     "name": member.name,

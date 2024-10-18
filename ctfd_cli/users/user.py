@@ -150,7 +150,7 @@ class UserHandler:
             return False        
         return True
     
-    def create_user(self, name: str, password: str, email: str = "", team_id: int = None, role: str = "user", verified: bool = False, banned: bool = False, hidden: bool = False, mode=UserObject, **kwargs) -> UserObject|None:
+    def create_user(self, name: str, password: str, email: str = "", team_id: int = None, role: str = "user", verified: bool = False, banned: bool = False, hidden: bool = False, mode=UserObject, return_if_exists=True, **kwargs) -> UserObject|None:
 
         if mode != UserObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
@@ -179,7 +179,7 @@ class UserHandler:
         )
         if r.status_code == 400:
             logger.error(f"User with name {name} already exists.")
-            return self.get_user_by_name(name)
+            return self.get_user_by_name(name) if return_if_exists else None
         
         data = self.__request__(r, None, 201)
         if data == None:
@@ -190,8 +190,8 @@ class UserHandler:
 
         return UserObject(**data)
     
-    def create_user_from_dict(self, user_dict: dict, mode=UserObject) -> UserObject|None:
-        return self.create_user(**user_dict)
+    def create_user_from_dict(self, user_dict: dict, return_if_exists: bool = True,  mode : object = UserObject) -> UserObject|None:
+        return self.create_user(**user_dict, mode=mode, return_if_exists=return_if_exists)
     
     def add_user_to_team(self, id: int, team_id: int) -> UserObject|None:
 
