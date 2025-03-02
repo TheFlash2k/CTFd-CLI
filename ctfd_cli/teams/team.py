@@ -48,7 +48,7 @@ class TeamHandler:
         
         return [team.__dict__ for team in teams]
     
-    def get_team_by_id(self, id: int, mode=TeamObject) -> TeamObject|dict|None:
+    def get_team_by_id(self, id: int, mode=TeamObject) -> TeamObject:
             
             if mode != TeamObject and mode != dict:
                 logger.error(f"Invalid mode {mode}")
@@ -75,7 +75,7 @@ class TeamHandler:
             
             return team.__dict__
     
-    def get_team_by_name(self, name: str, mode=TeamObject) -> TeamObject|None:
+    def get_team_by_name(self, name: str, mode=TeamObject) -> TeamObject:
                 
         if mode != TeamObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
@@ -106,7 +106,7 @@ class TeamHandler:
         
         return team.__dict__
 
-    def update_team_attribute(self, id: int = None, attributes : Dict[str, str] = {}, req_mode: Mode = Mode.PATCH, endpoint: str = "", mode = TeamObject) -> TeamObject|None:
+    def update_team_attribute(self, id: int = None, attributes : Dict[str, str] = {}, req_mode: Mode = Mode.PATCH, endpoint: str = "", mode = TeamObject) -> TeamObject:
 
         if mode != TeamObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
@@ -137,7 +137,7 @@ class TeamHandler:
         except:
             return data
     
-    def create_team(self, name: str, password: str, email: str = None, affiliation: str = None, website: str = None, country: str = None, return_if_exists: bool = True, mode: object = TeamObject, **kwargs) -> TeamObject|None:
+    def create_team(self, name: str, password: str, email: str = None, affiliation: str = None, website: str = None, country: str = None, return_if_exists: bool = True, mode: object = TeamObject, **kwargs) -> TeamObject:
         # kwargs kept to maintain compatibility with bulker
         if mode != TeamObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
@@ -180,7 +180,7 @@ class TeamHandler:
         
         return team.__dict__
     
-    def create_team_from_dict(self, team_dict: dict, return_if_exists: bool = True, mode: object = TeamObject) -> TeamObject|None:
+    def create_team_from_dict(self, team_dict: dict, return_if_exists: bool = True, mode: object = TeamObject) -> TeamObject:
         # get all args as dict and pass it to create_team
         return self.create_team(**team_dict, return_if_exists=return_if_exists, mode=mode)
     
@@ -196,7 +196,7 @@ class TeamHandler:
             return False        
         return True
     
-    def add_member(self, id: int, user_id: int, mode=TeamObject) -> TeamObject|None:
+    def add_member(self, id: int, user_id: int, mode=TeamObject) -> TeamObject:
             
         r = RequestHandler.MakeRequest(
             mode=Mode.GET,
@@ -240,14 +240,14 @@ class TeamHandler:
             return None
         return data.get("members", [])
     
-    def ban_team(self, id: int, mode=TeamObject) -> TeamObject|None:
+    def ban_team(self, id: int, mode=TeamObject) -> TeamObject:
         return self.update_team_attribute(id, {"banned": True}, mode=mode)
     
-    def unban_team(self, id: int, mode=TeamObject) -> TeamObject|None:
+    def unban_team(self, id: int, mode=TeamObject) -> TeamObject:
         return self.update_team_attribute(id, {"banned": False}, mode=mode)
     
-    def hide_team(self, id: int, mode=TeamObject) -> TeamObject|None:
+    def hide_team(self, id: int, mode=TeamObject) -> TeamObject:
         return self.update_team_attribute(id, {"hidden": True}, mode=mode)
     
-    def unhide_team(self, id: int, mode=TeamObject) -> TeamObject|None:
+    def unhide_team(self, id: int, mode=TeamObject) -> TeamObject:
         return self.update_team_attribute(id, {"hidden": False}, mode=mode)

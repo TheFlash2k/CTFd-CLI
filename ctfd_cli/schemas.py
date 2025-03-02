@@ -14,7 +14,9 @@ class UserObject:
 
         for elem in ["name", "affiliation"]:
             if hasattr(self, elem):
-                setattr(self, elem, getattr(self, elem).strip().title())
+                _ = getattr(self, elem)
+                if _ and _ is not None:
+                    setattr(self, elem, _.strip().title())
 
         self.__set_val__("password", random_string())
 
@@ -33,7 +35,8 @@ class UserObject:
                 if key not in ["id", "name", "team_id", "banned", "hidden"] and value is not None
             ])
                 
-            return f"CTFd-User({f'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}{f'id={_id}, ' if _id else ""}name={self.name}{f', team_id={team_id}, ' if team_id else ", "}{extras})"
+            return ''
+            # return f"CTFd-User({f'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}{f'id={_id}, ' if _id else ""}name={self.name}{f', team_id={team_id}, ' if team_id else ", "}{extras})"
         except Exception as E:
             return f"CTFd-User(?, Error: {E})"
     
@@ -51,7 +54,9 @@ class TeamObject:
 
         for elem in ["name", "affiliation"]:
             if hasattr(self, elem):
-                setattr(self, elem, getattr(self, elem).strip().title())
+                _ = getattr(self, elem)
+                if _ and _ is not None:
+                    setattr(self, elem, _.strip().title())
 
         self.__set_val__("password", random_string())
 
@@ -69,7 +74,8 @@ class TeamObject:
                 if key not in ["id", "name", "members", "banned", "hidden"] and value is not None
             ])
 
-            return f"CTFd-Team({f'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}{f'id={_id}, ' if _id else ""}name={self.name}, {f'members={self.members}, ' if hasattr(self, "members") else ""}{extras})"
+            return ''
+            # return f"CTFd-Team({f'[HIDDEN] ' if self.hidden else ''}{f'[BANNED] ' if self.banned else ''}{f'id={_id}, ' if _id else ""}name={self.name}, 'members={self.members}, {extras})"
         
         except Exception as E:
             return f"CTFd-Team(?, Error: {E})"

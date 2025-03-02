@@ -47,7 +47,7 @@ class UserHandler:
         
         return [user.__dict__ for user in users]
       
-    def get_user_by_id(self, id: int, mode=UserObject) -> UserObject|None:
+    def get_user_by_id(self, id: int, mode=UserObject) -> UserObject:
 
         if mode != UserObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
@@ -76,7 +76,7 @@ class UserHandler:
             return data
         return UserObject(**data)
 
-    def get_user_by_name(self, name : str, mode = UserObject) -> UserObject|None:
+    def get_user_by_name(self, name : str, mode = UserObject) -> UserObject:
 
         logger.info(f"Getting info of user {name}")
         r = RequestHandler.MakeRequest(
@@ -95,7 +95,7 @@ class UserHandler:
                 return self.get_user_by_id(user['id'], mode=mode)
         return None
     
-    def update_user_attribute(self, id : int = None, attributes : Dict[str, str] = {}, mode=UserObject) -> UserObject|None:
+    def update_user_attribute(self, id : int = None, attributes : Dict[str, str] = {}, mode=UserObject) -> UserObject:
 
         if mode != UserObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
@@ -150,7 +150,7 @@ class UserHandler:
             return False        
         return True
     
-    def create_user(self, name: str, password: str, email: str = "", team_id: int = None, role: str = "user", verified: bool = False, banned: bool = False, hidden: bool = False, mode=UserObject, return_if_exists=True, **kwargs) -> UserObject|None:
+    def create_user(self, name: str, password: str, email: str = "", team_id: int = None, role: str = "user", verified: bool = False, banned: bool = False, hidden: bool = False, mode=UserObject, return_if_exists=True, **kwargs) -> UserObject:
 
         if mode != UserObject and mode != dict:
             logger.error(f"Invalid mode {mode}")
@@ -190,10 +190,10 @@ class UserHandler:
 
         return UserObject(**data)
     
-    def create_user_from_dict(self, user_dict: dict, return_if_exists: bool = True,  mode : object = UserObject) -> UserObject|None:
+    def create_user_from_dict(self, user_dict: dict, return_if_exists: bool = True,  mode : object = UserObject) -> UserObject:
         return self.create_user(**user_dict, mode=mode, return_if_exists=return_if_exists)
     
-    def add_user_to_team(self, id: int, team_id: int) -> UserObject|None:
+    def add_user_to_team(self, id: int, team_id: int) -> UserObject:
 
         r = RequestHandler.MakeRequest(
             mode=Mode.GET,
